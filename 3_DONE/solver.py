@@ -2,9 +2,6 @@ file = open("input.txt", "r")
 
 schematic = []
 partNumbers = []
-gearLocations = []
-gearRatios = {}
-
 
 for line in file:
     schematic.append(line)
@@ -12,16 +9,7 @@ for line in file:
 def isSymbol(y, index):
     return schematic[y][index].isdigit() is False and schematic[y][index] != "."
 
-def isGear(y, index, number):
-    isGearLocation = isSymbol(y, index) is True and schematic[y][index] == "*"
-    if isGearLocation == True:
-        if (y, index) in gearRatios:
-            gearRatios[(y, index)].append(number)
-        else: 
-            gearRatios[(y, index)] = [number]
-
-        
-def rangeContainsGear(y, startIndex, endIndex, number):
+def rangeContainsSymbol(y, startIndex, endIndex):
     try:
         if startIndex < 0:
             startIndex = 0
@@ -29,20 +17,20 @@ def rangeContainsGear(y, startIndex, endIndex, number):
         for i in range(startIndex, endIndex):
             if i >= len(schematic[y]) - 1:
                 continue
-            if isGear(y, i, number) is True:
+            if isSymbol(y, i) is True:
                 return True
         return False
     except:
         print(f"{y}, {startIndex}, {endIndex}")
 
-def hasAnAjacentSymbol(y, startIndex, endIndex, number):
-    symbolToLeft = startIndex != 0 and isGear(y, startIndex - 1, number)
-    symbolToRight = endIndex < len(schematic[y]) - 1 and isGear(y, endIndex, number)
-    symbolOnTop = y != 0 and rangeContainsGear(y - 1, startIndex - 1, endIndex + 1, number)
+def hasAnAjacentSymbol(y, startIndex, endIndex):
+    symbolToLeft = startIndex != 0 and isSymbol(y, startIndex - 1)
+    symbolToRight = endIndex < len(schematic[y]) - 1 and isSymbol(y, endIndex)
+    symbolOnTop = y != 0 and rangeContainsSymbol(y - 1, startIndex - 1, endIndex + 1)
     
     symbolOnBottom = False
 
-    if y <= len(schematic) - 1 and rangeContainsGear(y + 1, startIndex - 1, endIndex + 1, number):
+    if y <= len(schematic) - 1 and rangeContainsSymbol(y + 1, startIndex - 1, endIndex + 1):
         symbolOnBottom = True
 
     hasAjacentSymbol = symbolToLeft or symbolToRight or symbolOnTop or symbolOnBottom
@@ -87,7 +75,7 @@ def scanSchematics():
                 except:
                     print()
 
-                if hasAnAjacentSymbol(lineNumber, startIndex, endIndex, number):
+                if hasAnAjacentSymbol(lineNumber, startIndex, endIndex):
                     print("########")
                     print(f"adding number {number}")
                     print("########")
@@ -97,26 +85,11 @@ def scanSchematics():
             else:
                 i += 1
 
-
-for lineNumber in range(len(schematic)):
-    for charNumber in range(len(schematic[lineNumber])):
-        if schematic[lineNumber][charNumber] == "*":
-            gearLocations.append({lineNumber, charNumber})
-
-for location in gearLocations:
-    print(location)
-
 scanSchematics()
 
 sum = 0
 
-for ratio in gearRatios.values():
-    if len(ratio) == 2:
-        print(ratio)
-        sum += int(ratio[0]) * int(ratio[1])
-
-
-#for number in partNumbers:
-#    sum += number
+for number in partNumbers:
+    sum += number
 
 print(sum)
